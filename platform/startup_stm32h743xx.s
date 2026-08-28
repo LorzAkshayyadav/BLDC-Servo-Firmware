@@ -81,6 +81,28 @@ LoopCopyDataInit:
   adds r4, r0, r3
   cmp r4, r1
   bcc CopyDataInit
+
+/* Copy the ITCM text segment (control ISR, transforms, controllers,
+ * modulator, motion loop, fault handlers -- hal/hal_sections.h ITCM_FUNC)
+ * from flash to ITCMRAM.  This must run before any ITCM_FUNC is called;
+ * that is guaranteed here because it happens before "bl main".  Symbols
+ * _sitcm/_eitcm/_siitcm come from platform/STM32H743xx_FLASH.ld. */
+  ldr r0, =_sitcm
+  ldr r1, =_eitcm
+  ldr r2, =_siitcm
+  movs r3, #0
+  b LoopCopyITCM
+
+CopyITCM:
+  ldr r4, [r2, r3]
+  str r4, [r0, r3]
+  adds r3, r3, #4
+
+LoopCopyITCM:
+  adds r4, r0, r3
+  cmp r4, r1
+  bcc CopyITCM
+
 /* Zero fill the bss segment. */
   ldr r2, =_sbss
   ldr r4, =_ebss

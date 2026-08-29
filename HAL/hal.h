@@ -121,6 +121,33 @@ void hal_enc_rearm(void);
  * Torque sensor.  RS-485, motion layer only, never the current loop.
  * Must tolerate a missing frame without disturbing the drive (arch section 8).
  * ------------------------------------------------------------------------- */
+
+/**
+ * @brief Initialize the torque sensor subsystem.
+ *
+ * Configures the RS-485 interface, initializes the DMA and UART peripherals
+ * for torque sensor communication. Must be called once during system
+ * initialization before hal_torque_sensor_start().
+ */
+void hal_torque_init(void);
+
+/**
+ * @brief Start acquisition of torque sensor frames.
+ *
+ * Enables the RS-485 receiver, starts DMA transfers, and begins monitoring
+ * for incoming torque sensor data. Frames are continuously acquired in the
+ * background.
+ */
+void hal_torque_sensor_start(void);
+
+/**
+ * @brief Stop acquisition of torque sensor frames.
+ *
+ * Disables the RS-485 receiver and halts DMA transfers. No new frames will
+ * be acquired after this call.
+ */
+void hal_torque_sensor_stop(void);
+
 typedef struct {
     int32_t  torque_mnm;
     bool     valid;

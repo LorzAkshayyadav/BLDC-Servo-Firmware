@@ -295,7 +295,18 @@ ITCM_FUNC void foc_isr(void)
      *      buffer, so you get the half second leading up to every trip
      *      automatically, including the ones nobody watched.
      * ------------------------------------------------------------------- */
-    scope_log(now, i_dq, v_dq, theta, a.v_bus_mv, duty);
+    scope_frame_t log = {0};
+    log.i_a = i_a;
+    log.i_b = i_b;
+    log.i_c = i_c;
+    log.angle_el = (int32_t)theta;
+    log.v_bus    = a.v_bus_mv;
+    log.duty_a   = duty.a;
+    log.duty_b   = duty.b;
+    log.duty_c   = duty.c;
+    log.fault_word = g_fault_word;
+
+    scope_log_write(&log);
 
     /* ---------------------------------------------------------------------
      * 13.  Re-arm the acquisition chain.  Clears SPI EOT on both buses --

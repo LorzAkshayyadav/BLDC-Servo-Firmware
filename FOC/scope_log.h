@@ -66,7 +66,7 @@ typedef struct {
                                      * duration histogram                     */
     int32_t period_ticks;           /* TIM5 interval; deviation is a free
                                      * jitter measurement (arch section 7 L1) */
-    int32_t fault_word;
+    uint32_t fault_word;
 } scope_frame_t;
 
 #define SCOPE_SOURCE_COUNT  (sizeof(scope_frame_t) / sizeof(int32_t))

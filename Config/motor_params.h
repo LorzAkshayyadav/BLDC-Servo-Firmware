@@ -57,7 +57,31 @@
  * absolute position after a restart. */
 #define ENC_MOTOR_MPC           0x5u
 #define ENC_LOAD_MPC            0x5u
-
+#if ENC_MOTOR_MPC == 0x5u
+#define ENC_MOTOR_RESOLUTION_BITS 19u
+#define ENC_MOTOR_PDLEN           21u
+#elif ENC_MOTOR_MPC == 0x6u
+#define ENC_MOTOR_RESOLUTION_BITS 20u
+#define ENC_MOTOR_PDLEN           22u
+#else
+#define ENC_MOTOR_RESOLUTION_BITS 18u
+#define ENC_MOTOR_PDLEN           20u
+#endif
+/* Separate macro from the motor block above -- the two encoders may
+ * legitimately run different MPC values (see the comment above), so a
+ * single shared ENC_PDLEN would either redefine to a differing value (a
+ * compiler warning) or, worse, silently resolve to whichever block a
+ * preprocessor evaluates last and get written to BOTH encoders. */
+#if ENC_LOAD_MPC == 0x5u
+#define ENC_LOAD_RESOLUTION_BITS 19u
+#define ENC_LOAD_PDLEN           21u
+#elif ENC_LOAD_MPC == 0x6u
+#define ENC_LOAD_RESOLUTION_BITS 20u
+#define ENC_LOAD_PDLEN           22u
+#else
+#define ENC_LOAD_RESOLUTION_BITS 18u
+#define ENC_LOAD_PDLEN           20u
+#endif
 /* Filter selection is a resolution-versus-latency trade and the latency lands
  * directly on angle staleness.  FILT 0x1 gives 14-bit interpolation at under
  * 1 us; the reset default 0x6 gives 41 us, which exceeds a whole PWM period

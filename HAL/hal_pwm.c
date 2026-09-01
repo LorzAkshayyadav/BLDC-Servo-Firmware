@@ -35,7 +35,7 @@
 #include "hal_sections.h"
 #include "board_limits.h"
 #include "tim.h"                 /* CubeMX: htim1 */
-
+#include "build_config.h"
 /* All six channel outputs plus the two pin-less trigger channels.
  *
  * CC4E/CC5E are enabled for certainty rather than necessity: OC4REF and
@@ -96,6 +96,9 @@ void hal_pwm_carrier_start(void)
  * -------------------------------------------------------------------------- */
 bool hal_pwm_outputs_enable(void)
 {
+#if BRINGUP_STAGE < STAGE_OPEN_LOOP
+    return false;   /* no motor below stage 3, and stage 0 has not passed */
+#endif
     if (!hal_sto_channel_1_ok() || !hal_sto_channel_2_ok()) {
         return false;                    /* STO asserted; nothing to discuss */
     }

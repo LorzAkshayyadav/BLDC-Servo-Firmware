@@ -56,9 +56,16 @@
 
 /* Q16 multiplier from raw counts to milliamps, folded once at compile time so
  * the ISR pays one multiply and one shift instead of three divisions. */
+/* mA per raw count, in Q16.
+ *
+ *   I_mA = counts * VREF_MV * 1000 / (65536 * GAIN * R_mOHM)
+ *
+ * because I(mA) x R(mOhm) = V(uV) exactly. The 2^16 of the Q16 scaling and
+ * the 2^16 of the ADC full scale cancel, which is why this reduces to a
+ * division that fits comfortably in 32 bits. Writing it in the unreduced
+ * form overflows at compile time and silently yields a wrong constant. */
 #define MA_PER_COUNT_Q16 \
-    (((int32_t)ADC_VREF_MV * 1000 * 65536) / \
-     (65536 * INA241_GAIN * SHUNT_MILLIOHM))
+    (((int32_t)ADC_VREF_MV * 1000) / (INA241_GAIN * SHUNT_MILLIOHM))
 
 #define OFFSET_CAL_SAMPLES     256u
 

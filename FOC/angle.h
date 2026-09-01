@@ -57,5 +57,15 @@ void angle_sincos(angle_t theta, sincos_t *out);
  */
 int32_t angle_speed_estimate(uint32_t position, uint32_t prev_position,
                              uint32_t interval_ticks);
+/**
+ * @brief Free-running electrical angle at a commanded speed, no encoder.
+ *
+ * Stage 3 ("open loop, forced angle") and stage 4 ("current loop closed on
+ * the forced angle") both need an angle that does not depend on a calibrated
+ * commutation offset -- which is only found at stage 5.
+ */
+angle_t angle_forced_step(int32_t speed_rpm, uint32_t interval_ticks);
 
+/** @brief Zero the forced-angle accumulator. Call before entering a forced mode. */
+void angle_forced_reset(void);
 #endif /* ANGLE_H */

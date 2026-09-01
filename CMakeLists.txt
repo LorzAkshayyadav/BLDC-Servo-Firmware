@@ -65,14 +65,16 @@ target_sources(${CMAKE_PROJECT_NAME} PRIVATE
     common/fixed.c              # MISSING: trig table
 
     # -- L1 --------------------------------------------------------------
+    hal/hal_memory.c
     hal/hal_pwm.c
     hal/hal_sequencer.c
     hal/hal_adc.c
     hal/hal_encoder.c
+    hal/hal_encoder_ll.c
     hal/hal_fieldbus.c
     hal/hal_torque_sensor.c
     hal/hal_safety.c
-    hal/hal_persist.c
+    hal/hal_watchdog.c
     hal/hal_time.c
     hal/isr_vectors.c
 
@@ -198,8 +200,6 @@ if(BUILD_HOST_TESTS)
         motion/feedforward.c
         motion/traj_limit.c
         motion/brake_seq.c
-        test/host/hal_stub.c
-        test/host/plant_model.c
         test/host/test_angle_wrap.c
         test/host/test_current_loop.c
         test/host/test_velocity_accum.c

@@ -157,9 +157,23 @@ typedef struct {
     uint32_t stamp;
     bool     ff_valid;
 } position_cmd_t;
-
+typedef struct {
+    int32_t  velocity_rpm;                   
+    int32_t  accel_ff;
+    uint32_t stamp;
+    bool     ff_valid;
+} velocity_cmd_t;
+typedef enum {
+    CTRL_MODE_IDLE = 0,          /* bridge enabled, zero duty              */
+    CTRL_MODE_FIXED_DUTY,        /* stage 1: motor disconnected            */
+    CTRL_MODE_OPEN_LOOP_VOLTAGE, /* stage 3: forced angle, no current loop */
+    CTRL_MODE_CURRENT_FORCED,    /* stage 4: current loop, forced angle    */
+    CTRL_MODE_FOC,               /* stage 5 onward                         */
+} ctrl_mode_t;
 CONTRACT_DECLARE(position_cmd_t, position_cmd_contract_t);
+CONTRACT_DECLARE(velocity_cmd_t, velocity_cmd_contract_t);
 extern position_cmd_contract_t g_position_cmd;
+extern velocity_cmd_contract_t g_velocity_cmd;
 
 /* =========================================================================
  * 5.  GAINS AND PARAMETERS
@@ -186,6 +200,8 @@ typedef struct {
     uint32_t transmission_tol;        /* built from 20 arcsec/encoder, not
                                        * from the 2.5 arcsec resolution      */
     uint32_t torque_path_tol_mnm;
+    ctrl_mode_t ctrl_mode;
+    int32_t     forced_speed_rpm;   /* CTRL_MODE_*_FORCED only */
 } params_t;
 
 CONTRACT_DECLARE(params_t, params_contract_t);
@@ -223,5 +239,5 @@ static inline void fault_set(hal_trip_cause_t cause)
  * @return true if @ref g_fault_word is nonzero.
  */
 static inline bool fault_any(void) { return g_fault_word != 0u; }
-
+void fault_clear_all(void);
 #endif /* CONTRACTS_H */

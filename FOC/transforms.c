@@ -2,18 +2,19 @@
 
 /* Clarke (two-current), Park, inverse Park */
 ab_t clarke_2ph(int32_t i_b_ma, int32_t i_c_ma){
-    /* The two-current Clarke transform is a 2x2 rotation matrix:
-     *   [ alpha ]   [ 1      -0.5 ] [ i_b ]
-     *   [ beta  ] = [ 0  sqrt(3)/2 ] [ i_c ]
+    /* Phase A is not an input (it is derived: i_a = -(i_b+i_c)) and the
+     * alpha axis is the phase-A axis, so substituting i_a into the standard
+     * 3-phase Clarke matrix and eliminating it gives, scaled by 1.5 to avoid
+     * the extra multiply by two that would be needed to convert beta back to
+     * the original units:
+     *   alpha = -1.5 * (i_b + i_c)
+     *   beta  =  sqrt(3)/2 * (i_b - i_c)
      *
-     * The sqrt(3)/2 is about 0.86602540378, which is exactly 0xDEBC in Q15.
-     * The -0.5 is exactly -16384 in Q15.  The alpha output is scaled by
-     * 1.5 to avoid the extra multiply by two that would be needed to
-     * convert the beta output back to the original units.
+     * The sqrt(3)/2 is about 0.86602540378, which is exactly 0x6EDA in Q15.
      */
     ab_t out;
-    out.alpha = (i_b_ma - (i_c_ma >> 1)) * 3 / 2;
-    out.beta  = (int32_t)(((int64_t)i_c_ma * (int32_t)0xDEBC) >> 15);
+    out.alpha = -(i_b_ma + i_c_ma) * 3 / 2;
+    out.beta  = (int32_t)(((int64_t)(i_b_ma - i_c_ma) * (int32_t)0x6EDA) >> 15);
     return out;
 }
 dq_t park(ab_t v, const sincos_t *sc)

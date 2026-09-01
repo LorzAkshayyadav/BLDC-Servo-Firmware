@@ -108,5 +108,26 @@
  * (e.g. foc_isr.c) should _Static_assert the two are equal rather than
  * silently trusting them to be kept in sync by hand. */
 #define VELOCITY_ACCUM_DEPTH    4u
+/* Below this current the sign is noise, and a dead-time compensation that
+ * flips with it injects a square wave at the noise rate -- worse than no
+ * compensation. This deadband is the difference between the correction
+ * helping and hurting. */
+#define DEADTIME_COMP_DEADBAND_MA   200
 
+/* I^2t budget before a thermal trip. Units are whatever the accumulator in
+ * the supervisory task uses; set it there and mirror it here. */
+#define THERMAL_ACCUM_LIMIT         0u
+
+/* -- Trajectory limiting (motion/traj_limit.c) ------------------------------
+ * Maximum rpm change the velocity setpoint may take per 4 kHz motion-task
+ * step -- an acceleration limit expressed per-step rather than per-second
+ * because that is the unit the limiter actually applies it in, so it must
+ * be re-derived whenever HAL_MOTION_DIVIDER (hal/hal.h) changes. A naive
+ * magnitude-only velocity clamp produces a discontinuity, and a
+ * discontinuity in velocity is an infinite acceleration demand; this is
+ * what makes that clamp safe. */
+#ifndef TRAJ_MAX_ACCEL_RPM_PER_STEP
+#define TRAJ_MAX_ACCEL_RPM_PER_STEP  0
+#warning "TRAJ_MAX_ACCEL_RPM_PER_STEP is a placeholder -- derive from the motor/load inertia and available torque"
+#endif
 #endif /* CONTROL_PARAMS_H */

@@ -45,5 +45,6 @@ hal_trip_cause_t tier2_fast(int32_t i_a_ma, int32_t i_b_ma, int32_t i_c_ma,
  */
 hal_trip_cause_t tier2_slow(int32_t speed_rpm, uint32_t thermal_accum,
                             const params_t *p);
-
+/** @brief Clear the persistence counters. Called from foc_reset_integrators(). */
+void tier2_reset(void);
 #endif /* TIER2_CHECKS_H */

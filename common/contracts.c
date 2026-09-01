@@ -34,8 +34,9 @@ _Static_assert(_Alignof(current_ref_t) == _Alignof(uint32_t),
 /* -- 3. Velocity accumulator --------------------------------------------- */
 DTCM_BSS velocity_contract_t g_velocity;
 
-/* -- 4. Position command -------------------------------------------------- */
+/* -- 4. Position/velocity command -------------------------------------------------- */
 DTCM_BSS position_cmd_contract_t g_position_cmd;
+DTCM_BSS velocity_cmd_contract_t g_velocity_cmd;
 
 /* -- 5. Gains and parameters ---------------------------------------------- */
 DTCM_BSS params_contract_t g_params;

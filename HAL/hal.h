@@ -272,14 +272,37 @@ uint16_t hal_carrier_position(void);
 void hal_deadline_kick(void);
 
 /* =========================================================================
+ * INDEPENDENT WATCHDOG  --  IWDG, refreshed only from the supervisory task
+ * ========================================================================= */
+
+/**
+ * @brief Refresh the independent hardware watchdog (IWDG).
+ *
+ * Must be called ONLY from the 1 kHz supervisory task (app/supervisor.c),
+ * and only as the LAST step of that task, after every cross-check has had a
+ * chance to fault. Refreshing here and nowhere else turns the watchdog into
+ * an end-to-end liveness proof: the supervisory task only runs because the
+ * FOC ISR pended it, the FOC ISR only runs because the ADC completed a
+ * conversion, and the ADC only converts because TIM1 is triggering it (arch
+ * section 7, L4). Refreshing from the main loop instead would prove only
+ * that the main loop is alive, which it would be with the control loop
+ * completely dead.
+ *
+ * TODO: not yet implemented (no hal.c currently defines this) -- declared
+ * here so app/supervisor.c compiles against a real prototype ahead of that
+ * work.
+ */
+void hal_watchdog_refresh(void);
+
+/* =========================================================================
  * SAFETY  --  every fault path from every tier converges here
  * ========================================================================= */
 
 typedef enum {
     HAL_TRIP_NONE = 0,
-    HAL_TRIP_AWD_PHASE_A,
-    HAL_TRIP_AWD_PHASE_B,
-    HAL_TRIP_AWD_PHASE_C,
+    HAL_TRIP_OVERCURRENT_A,
+    HAL_TRIP_OVERCURRENT_B,
+    HAL_TRIP_OVERCURRENT_C,
     HAL_TRIP_BREAK_STO,
     HAL_TRIP_DEADLINE,
     HAL_TRIP_PERIOD_MISSED,
@@ -404,48 +427,7 @@ void hal_fieldbus_enqueue_mailbox(const uint8_t *buf, uint16_t len);
  */
 uint32_t hal_fieldbus_overrun_count(void);
 
-/* =========================================================================
- * PERSISTENT STATE  --  backup SRAM, never zeroed at startup
- * ========================================================================= */
-
-typedef struct {
-    int32_t  multiturn_motor;
-    int32_t  multiturn_load;
-    uint32_t fault_history_head;
-    uint32_t integrity;          /* if this fails: FAULT requiring
-                                  * re-referencing, NOT a silent zero        */
-} hal_persist_t;
-
-/**
- * @brief Check whether backup SRAM holds a valid persistent-state record.
- *
- * If this fails, treat it as a fault requiring re-referencing, NOT a reason
- * to assume zero -- a confidently wrong joint position can otherwise be
- * reported while both encoders read perfectly.
- *
- * @return true if the integrity check passes.
- */
-bool hal_persist_valid(void);
-
-/**
- * @brief Read the persistent-state record from backup SRAM.
- * @param out Filled with the stored record. Must not be NULL.
- */
-void hal_persist_read(hal_persist_t *out);
-
-/**
- * @brief Write the persistent-state record to backup SRAM.
- * @param in Record to store. Must not be NULL.
- */
-void hal_persist_write(const hal_persist_t *in);
-
-/**
- * @brief Append one fault occurrence to the battery-backed fault history.
- * @param cause Trip cause being recorded.
- * @param stamp HAL_TICK_HZ timestamp of the event.
- */
-void hal_persist_log_fault(hal_trip_cause_t cause, uint32_t stamp);
-
+void hal_fieldbus_sync_captured(uint32_t capture);
 /* =========================================================================
  * TASK PENDING  --  the ISR pends the slower layers; it never calls them
  * ========================================================================= */
@@ -502,6 +484,8 @@ bool hal_init_encoders(void);
  * @return true on success.
  */
 bool hal_init_sequencer(void);
+
+void hal_init_pended_vectors(void);
 
 /**
  * @brief Bring up the fieldbus interface.

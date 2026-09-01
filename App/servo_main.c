@@ -23,6 +23,7 @@
  *   entirely under our control below (arch section 4).
  * ============================================================================= */
 
+#include "servo_main.h"
 #include "hal.h"
 #include "foc.h"
 #include "motion.h"
@@ -78,12 +79,7 @@ void servo_main(void)
         init_failed(HAL_TRIP_NONE);
     }
 
-    /* 2. Persistent state, before anything depends on calibration validity.
-     *
-     * A failed integrity check is a fault requiring re-referencing, NOT a
-     * reason to assume zero: you would otherwise report a confidently wrong
-     * joint position while both encoders read perfectly (arch section 10.1). */
-    (void)hal_persist_valid();
+
 
     /* 3. Safety first, literally.  STO monitors readable, brake engaged,
      *    outputs configured and OFF.  Nothing below may turn a gate on. */
